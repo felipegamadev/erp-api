@@ -1,0 +1,38 @@
+services:
+  erp_api:
+    container_name: erp_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '${APP_PORT}:${APP_PORT}'
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: ${DB_URL}
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+    depends_on:
+      - erp_db
+
+  erp_db:
+    container_name: erp_db
+    image: postgres:18rc1-alpine
+    restart: always
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - erp_db_data:/var/lib/postgresql/data
+
+volumes:
+  erp_db_data:
