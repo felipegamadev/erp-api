@@ -1,5 +1,6 @@
 generator client {
-    provider = "prisma-client-js"
+    provider      = "prisma-client-js"
+    binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -14,6 +15,18 @@ model User {
     password  String   @db.VarChar(255)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    Token     Token[]
 
     @@map("users")
+}
+
+model Token {
+    id        String   @id @default(uuid()) @db.Uuid
+    token     String   @unique
+    userId    String   @db.Uuid
+    user      User     @relation(fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+    expiresAt DateTime
+
+    @@map("tokens")
 }
