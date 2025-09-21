@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Get,
     HttpCode,
     HttpStatus,
     Post,
@@ -16,6 +17,20 @@ import { Request, Response } from 'express'
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
+
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard)
+    @Get('profile')
+    public async getProfile(
+        @Req() request: Request,
+        @Res() response: Response
+    ): Promise<void> {
+        const user = await this.authService.getProfile(request)
+        response.json({
+            message: 'Success',
+            user
+        })
+    }
 
     @HttpCode(HttpStatus.OK)
     @Post('login')

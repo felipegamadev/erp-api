@@ -1,8 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common'
+import {
+    Injectable,
+    NotFoundException,
+    UnauthorizedException
+} from '@nestjs/common'
 import { UserService } from '../user/user.service'
 import { TokenService } from '../token/token.service'
 import { CookieService } from '../cookie/cookie.service'
-import { type LoginDto } from './auth.dto'
+import { ProfileDto, type LoginDto } from './auth.dto'
 import { type User } from '@prisma/client'
 import { type Request, type Response } from 'express'
 import Constants from '../utils/constants'
@@ -15,6 +19,14 @@ export class AuthService {
         private readonly tokenService: TokenService,
         private readonly cookieService: CookieService
     ) {}
+
+    public async getProfile(request: Request): Promise<ProfileDto | null> {
+        const user = request.user as User
+        if (user == null) {
+            throw new NotFoundException()
+        }
+        return new ProfileDto(user)
+    }
 
     public async onLogin(
         loginDto: LoginDto,
