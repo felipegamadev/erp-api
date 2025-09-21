@@ -8,6 +8,7 @@ import { type Token, type User } from '@prisma/client'
 import { type Request } from 'express'
 import * as ms from 'ms'
 import { type StringValue } from 'ms'
+import { Cron, CronExpression } from '@nestjs/schedule'
 
 @Injectable()
 export class TokenService extends PassportStrategy(Strategy) {
@@ -67,5 +68,17 @@ export class TokenService extends PassportStrategy(Strategy) {
                 where: { userId: user.id }
             })
         }
+    }
+
+    @Cron(CronExpression.EVERY_HOUR)
+    public async deleteExpired(): Promise<void> {
+        await this.prismaService.token.deleteMany({
+            where: {
+                expiresAt: {
+                    lte: new Date()
+                }
+            }
+        })
+        console.log('Expired tokens have been deleted')
     }
 }
