@@ -3,7 +3,8 @@ import { UserService } from '../user/user.service'
 import { TokenService } from '../token/token.service'
 import { CookieService } from '../cookie/cookie.service'
 import { type LoginDto } from './auth.dto'
-import { type Response } from 'express'
+import { type User } from '@prisma/client'
+import { type Request, type Response } from 'express'
 import Constants from '../utils/constants'
 import * as argon2 from 'argon2'
 
@@ -27,5 +28,11 @@ export class AuthService {
         await this.tokenService.deleteMany(user)
         const token = await this.tokenService.create(user)
         this.cookieService.create(Constants.AUTH_TOKEN, token.token, response)
+    }
+
+    public async onLogout(request: Request, response: Response): Promise<void> {
+        const user = (request.user as User) ?? null
+        await this.tokenService.deleteMany(user)
+        this.cookieService.delete(Constants.AUTH_TOKEN, response)
     }
 }

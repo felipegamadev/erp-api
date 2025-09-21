@@ -34,6 +34,14 @@ export class TokenService extends PassportStrategy(Strategy) {
         return { userId: payload.sub, username: payload.username }
     }
 
+    public async isRegistered(token: string): Promise<boolean> {
+        return (
+            (await this.prismaService.token.findUnique({
+                where: { token }
+            })) != null
+        )
+    }
+
     public async create(user: User): Promise<Token> {
         const token = await this.prismaService.token.create({
             data: {
